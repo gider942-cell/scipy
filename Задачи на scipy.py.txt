@@ -1,0 +1,40 @@
+import numpy as np 
+from scipy.optimize import fsolve
+from scipy.integrate import quad
+from scipy.interpolate import interp1d
+import matplotlib.pyplot as plt
+
+def equations(vars):
+    x, y = vars
+    eq1 = x**2 + y**2 - 1
+    eq2 = x - y 
+    return [eq1, eq2]
+    
+initial_guess = [0.5, 0.5]
+
+solution = fsolve(equations, initial_guess)
+
+print(f"Решение: x = {solution[0]:.4f}, y = {solution[1]:.4f}")
+
+def integrand(x):
+    return np.sin(x)
+    
+result, error = quad(integrand, 0, np.pi)
+
+print(f"Результат интегрирования: {result:.6f}")
+print(f"Оценка ошибки: {error:.2f}")
+
+x_data = np.array([0, 1, 2, 3, 4, 5])
+y_data = np.array([0, 0.8, 0.9, 0.1, -0.8, -1.0])
+
+f_cubic = interp1d(x_data, y_data, kind='cubic')
+
+x_new = np.linspace(0, 5, num=100)
+y_new = f_cubic(x_new)
+
+print("Интерполированные значения (первые 5):", y_new[:5])
+
+plt.plot(x_data, y_data, 'o', label='Исходные данные')
+plt.plot(x_new, y_new, '-', label='Кубическая интерполяция')
+plt.legend()
+plt.show()
