@@ -1,0 +1,63 @@
+import numpy as np 
+import pandas as pd 
+from scipy import optimize, stats 
+import matplotlib.pyplot as plt 
+
+np.random.seed(42)
+n_samples = 200
+area = np.random.uniform(20, 120, size=n_samples)
+noise = np.random.normal(0, 15, size=n_samples)
+
+price = 150 * area + 5000 + noise
+
+df = pd.DataFrame({
+    'area': area,
+    'price': price
+})
+
+df.loc[5, 'area'] = -10
+df.loc[10, 'price'] = -500
+df.loc[15, 'price'] = np.nan 
+
+print("Первые 5 строк исходного DataFrame:")
+print(df.head())
+
+df_clean = df[(df['area'] > 0) & (df['price'] > 0)].dropna()
+
+print("\nРазмер очищенного DataFrame:", df_clean.shape)
+
+def model(params, x):
+    a, b = params
+    return a * x + b
+    
+def residuals(params, x, y):
+    return model(params, x) - y
+    
+x_data = df_clean['area'].values
+y_data = df_clean['price'].values
+
+initial_guess = [100, 0]
+
+result = optimize.least_squares(residuals, initial_guess, args=(x_data, y_data))
+a_opt, b_opt = result.x 
+
+print(f"\nОптимальные параметры модели: a = {a_opt:.2f}, b = {b_opt:.2f}")
+
+y_pred = model([a_opt, b_opt], x_data)
+
+correlation, p_value = stats.pearsonr(x_data, y_data)
+print(f"Коэффициент корреляции Пирсона: {correlation:.4f}")
+print(f"P-значение: {p_value:.4e}")
+
+residuals_vals = y_data - y_pred
+shapiro_stat, shapiro_p = stats.shapiro(residuals_vals)
+print(f"Тест Шапиро-Уилка для остатков: статистика = {shapiro_stat:.4f}, p-значение = {shapiro_p:.4e}")
+
+plt.scatter(x_data, y_data, alpha=0.5, label='Данные')
+plt.plot(x_data, y_pred, color='red', linewidth=2, label=f'Модель: price = {a_opt:.1f} * area + {b_opt:.1f}')
+plt.xlabel('Площадь, м?')
+plt.ylabel('Цена, руб.')
+plt.legend()
+plt.title('Подбор линейной модели с помощью scipy.optimize')
+plt.grid(True)
+plt.show()
