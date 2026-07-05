@@ -1,0 +1,64 @@
+import numpy as np 
+from fractions import Fraction 
+from scipy.interpolate import interp1d 
+from scipy.integrate import quad 
+import matplotlib.pyplot as plt 
+import pandas as pd 
+
+xc_frac = [Fraction(0, 1), Fraction(1, 2), Fraction(3, 4), Fraction(5, 6), Fraction(1, 1)]
+yc_frac = [Fraction(0, 1), Fraction(1, 3), Fraction(2, 5), Fraction(7, 10), Fraction(9, 10)]
+
+xs = [float(x) for x in xc_frac]
+yc = [float(y) for y in yc_frac]
+
+df_raw = pd.DataFrame({
+    'x_frac': xs_frac,
+    'y_frac': ys_frac,
+    'x': xs,
+    'y': ys
+})
+print("Исходные данные (с дробями):")
+print(df_raw)
+print()
+
+f_interp = interp1d(xs, ys, kind='cubic')
+
+x_dense = np.linspace(min(xs), max(xs), 400)
+y_dense = f_interp(x_dense)
+
+df_interp = pd.DataFrame({
+    'x': x_dense,
+    'y_interp': y_dense
+})
+
+df_interp['x_approx_frac'] = df_interp['x'].apply(lambda v: Fraction(v).limit_denominator(1000))
+
+print("Первые 10 строк интерполированных данных:")
+print(df_interp.head(10))
+print()
+
+area, error = quad(f_interp, min(xs), max(xs))
+print(f"Интеграл (площадь под кривой): {area:.6f} ± {error:.2e}")
+
+area_trap = np.trapz(df_interp['y_interp'], df_interp['x'])
+print(f"Оценка интеграла через метод трапеций (DataFrame): {area_trap:.6f}")
+print()
+
+plt.figure(figsize=(8, 5))
+
+plt.scatter(xs, ys, color='red', zorder=5, label='Исходные точки (дроби)')
+
+plt.plot(x_dense, y_dense, color='blue', linewidth=2, label='Кубическая интерполяция')
+
+plt.fill_between(x_dense, 0, y_dense, color='lightblue', alpha=0.4, label=f'Площадь ? {area:.3f}')
+
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Интерполяция и интегрирование с использованием дробей и DataFrame')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+print("Статистика по интерполированным данным:")
+print(df_interp[['y_interp']].describe())
