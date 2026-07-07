@@ -1,0 +1,41 @@
+import numpy as np
+from scipy import special
+import math
+
+def main():
+
+    x = np.array([0.1, 1, 2, 5, 10])
+    ln_x = np.log(x)  
+    print("Натуральный логарифм (ln):")
+    for val, res in zip(x, ln_x):
+        print(f"ln({val}) = {res:.4f}")
+
+    base = 10
+    log10_x = np.log(x) / np.log(base)
+    print(f"\nЛогарифм по основанию {base}:")
+    for val, res in zip(x, log10_x):
+        print(f"log{base}({val}) = {res:.4f}")
+    
+    log10_alt = np.log10(x)
+
+    small_x = np.array([1e-10, 1e-8, 1e-6, 1e-4])
+    log1p_res = special.log1p(small_x) 
+    print("\nlog1p(x) = ln(1 + x) для малых значений:")
+    for val, res in zip(small_x, log1p_res):
+        print(f"log1p({val}) = {res:.12f}")
+
+    gamma_args = np.array([1, 2, 3, 4, 5])
+    lgamma_res = special.gammaln(gamma_args)
+    print("\nln(?(x)) (логарифм гамма-функции):")
+    for val, res in zip(gamma_args, lgamma_res):
+        expected = math.log(math.factorial(int(val) - 1)) if val > 0 else float('nan')
+        print(f"ln(?({val})) = {res:.6f}, ожидаемое ln({int(val)-1}!) = {expected:.6f}")
+
+    z = np.array([1 + 1j, 2 - 3j, -1 + 0.5j])
+    ln_z = np.log(z)  
+    print("\nНатуральный логарифм комплексных чисел:")
+    for val, res in zip(z, ln_z):
+        print(f"ln({val}) = {res}")
+
+if __name__ == "__main__":
+    main()
