@@ -1,0 +1,64 @@
+import numpy as np 
+from scipy import special, integrate, optimize 
+import matplotlib.pyplot as plt 
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([4, 5, 6])
+arr_mul = arr1 * arr2
+print("Поэлементное умножение массивов:", arr_mul)
+print("Сумма элементов массива:", np.sum(arr1))
+
+x = np.arange(len(arr1))  # позиции для столбцов
+width = 0.25
+
+fig, ax = plt.subplots()
+ax.bar(x - width, arr1, width, label='arr1')
+ax.bar(x, arr2, width, label='arr2')
+ax.bar(x + width, arr_mul, width, label='arr1 * arr2')
+
+ax.set_xticks(x)
+ax.set_xticklabels([f'i={i}' for i in range(len(arr1))])
+ax.set_ylabel('Значение')
+ax.set_title('Поэлементное умножение массивов')
+ax.legend()
+plt.tight_layout()
+plt.show()
+
+n_vals = np.arange(1, 11)
+fact_vals = special.factorial(n_vals)
+gamma_vals = special.gamma(n_vals + 1)
+
+n = 5
+fact_n = special.factorial(n)
+gamma_n = special.gamma(n + 1)
+print(f"{n}! = {fact_n}, Г({n+1}) = {gamma_n}")
+
+plt.figure()
+plt.plot(n_vals, fact_vals, 'o-', label='n!')
+plt.plot(n_vals, gamma_vals, 's--', label='?(n+1)')
+plt.xlabel('n')
+plt.ylabel('Значение')
+plt.title('Факториал и гамма-функция')
+plt.xticks(n_vals)
+plt.legend()
+plt.grid(True, linestyle=':', alpha=0.5)
+plt.tight_layout()
+plt.show()
+
+def equation(x):
+    return x**3 - x - 2
+    
+root = optimize.brentq(equation, 1, 2)
+print(f"Корень уравнения x^3 - x - 2 = 0: x ? {root:.6f}")
+
+x_vals = np.linspace(1, 2, 400)
+y_vals = equation(x_vals)
+
+plt.figure()
+plt.xlabel('n')
+plt.ylabel('Значение')
+plt.title('Факториал и гамма-функция')
+plt.legend()
+plt.grid(True, linestyle=':', alpha=0.5)
+plt.tight_layout()
+plt.show()
