@@ -1,0 +1,45 @@
+import numpy as np 
+from scipy import linalg 
+from scipy.optimize import fsolve, brentq 
+from scipy.interpolate import lagrange 
+
+def matrix_decompositions():
+    A = np.array([
+        [4, 3],
+        [6, 3]
+    ], dtype=float)
+    
+    P, L, U = linalg.lu(A)
+    print("\nLU-разложение:")
+    print("P:\n", P)
+    print("L:\n", L)
+    print("U:\n", U)
+    print("Проверка P @ L @ U == A:", np.allclose(P @ L @ U, A))
+    
+    U_svd, s, Vh_svd = linalg.svd(A)
+    S = linalg.diagsvd(s, *A.shape)
+    print("\nSVD-разложение:")
+    print("U:\n", U_svd)
+    print("Sigma (диагональ):", s)
+    print("Vh:\n", Vh_svd)
+    print("Проверка U @ S @ Vh == A:", np.allclose(U_svd @ S @ Vh_svd, A))
+    
+def eigenvalues_and_vectors():
+    A = np.array([
+        [2, 1],
+        [1, 2]
+    ], dtype=float)
+    
+    eigvals, eigvecs = linalg.eig(A)
+    print("\nСобственные значения:", eigvals)
+    print("Собственные векторы (столбцы):\n", eigvecs)
+    
+    for i, lam in enumerate(eigvals):
+        v = eigvecs[:, i]
+        lhs = A @ v 
+        rhs = lam * v 
+        print(f"Проверка для lambda_{i}: max|A v - lambda v| =", np.max(np.abs(lhs - rhs)))
+    
+if __name__ == "__main__":
+    matrix_decompositions()
+    eigenvalues_and_vectors()
