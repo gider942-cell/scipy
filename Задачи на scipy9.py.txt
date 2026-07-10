@@ -1,0 +1,67 @@
+import numpy as np 
+from scipy import stats 
+from scipy.stats import chisquare 
+
+values = np.array([1, 2, 3, 4, 5])
+probabilities = np.array([0.1, 0.2, 0.3, 0.25, 0.15])
+
+assert np.isclose(probabilities.sum(), 1.0), "Сумма вероятностей должна быть равна 1"
+
+custom_dist = stats.rv_discrete(name='custom_discrete', values=(values, probabilities))
+
+mean = custom_dist.mean()
+var = custom_dist.var()
+std = custom_dist.std()
+median = custom_dist.median()
+
+print("Характеристики распределения:")
+print(f"Математическое ожидание: {mean:.4f}")
+print(f"Дисперсия: {var:.4f}")
+print(f"Стандартное отклонение: {std:.4f}")
+print(f"Медиана: {median:.4f}")
+
+q25 = custom_dist.ppf(0.25)
+q50 = custom_dist.ppf(0.50)
+q75 = custom_dist.ppf(0.75)
+print(f"Квантили: Q25={q25}, Q50={q50}, Q75={q75}")
+
+cdf_values = custom_dist.cdf(values)
+print("CDF в точках значений:", cdf_values)
+
+np.random.seed(42)
+sample_size = 1000
+sample = custom_dist.rvs(size=sample_size)
+
+print("\nПервые 20 значений выборки:", sample[:20])
+
+counts_full = np.zeros_like(values, dtype=int)
+unique, counts_unique = np.unique(sample, return_counts=True)
+
+for u, c in zip(unique, counts_unique):
+    idx = np.where(values == u)[0]
+    if len(idx) > 0:
+        counts_full[idx[0]] = c
+
+empirical_freq = counts_full / sample_size
+print("Эмпирические частоты:", dict(zip(values, empirical_freq)))
+print("Теоретические вероятности:", dict(zip(values, probabilities)))
+
+expected_counts = probabilities * sample_size
+chi2_stat, p_value = chisquare(f_obs=counts_full, f_exp=expected_counts)
+
+print(f"\nКритерий хи?квадрат: ?? = {chi2_stat:.4f}, p?значение = {p_value:.4f}")
+if p_value > 0.05:
+    print("Вывод: нет оснований отвергать гипотезу о соответствии выборки распределению.")
+else:
+    print("Вывод: гипотеза о соответствии выборки распределению отвергается.")
+    
+from math import comb
+from scipy.special import comb as scipy_comb
+
+n, k = 50, 10
+c_math = comb(n, k)
+c_scipy = scipy_comb(n, k, exact=True)
+
+print(f"\nЧисло сочетаний C({n}, {k}):")
+print(f"  через math.comb:      {c_math}")
+print(f"  через scipy.special:  {c_scipy}")
