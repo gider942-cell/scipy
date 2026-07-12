@@ -1,0 +1,50 @@
+import numpy as np 
+from scipy.spatial import KDTree
+from scipy.spatial.distance import cdist 
+import matplotlib.pyplot as plt 
+
+np.random.seed(42)
+n_points = 20 
+points = np.random.rand(n_points, 2)
+print("Первые 5 точек:\n", points[:5])
+
+distance_matrix = cdist(points, points, metric='euclidean')
+np.fill_diagonal(distance_matrix, np.inf)
+nearest_neighbor_idx = np.argmin(distance_matrix, axis=1)
+nearest_distances = np.min(distance_matrix, axis=1)
+print("\nБлижайшие соседи (индекс) и расстояния:")
+for i in range(n_points):
+    print(f"Точка {i}: ближайший сосед - {nearest_neighbor_idx[i]}, расстояние = {nearest_distances[i]:.3f}")
+    
+tree = KDTree(points)
+k = 3 
+distances, indices = tree.query(points, k=k)
+print("\nПример результатов KDTree для первых 3 точек:")
+for i in range(3):
+    print(f"Точка {i}: соседи по индексам {indices[i]}, расстояния {distances[i]}")
+    
+def get_k_nearest_neighbors(tree, points, k=3):
+    d, idx = tree.query(points, k=k+1)
+    return d[:, 1:], idx[:, 1:]
+neigh_dist, neigh_idx = get_k_nearest_neighbors(tree, points, k=2)
+
+def mean_k_distances(tree, points, k=3):
+    distances, _ = get_k_nearest_neighbors(tree, points, k=k)
+    return np.mean(distances, axis=1)
+    
+plt.figure(figsize=(8, 6))
+plt.scatter(points[:, 0], points[:, 1], c='blue', label='Точки')
+for i in range(n_points):
+    for j in [1, 2]:
+        if j < indices.shape[1]:
+            neighbor_idx = indices[i, j]
+            x_vals = [points[i, 0], points[neighbor_idx, 0]]
+            y_vals = [points[i, 1], points[neighbor_idx, 1]]
+            plt.plot(x_vals, y_vals, color='gray', linewidth=0.8, alpha=0.6)
+plt.title('Пространственные данные и связи ближайших соседей')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.3)
+plt.axis('equal')
+plt.show()
