@@ -1,0 +1,72 @@
+import numpy as np 
+import matplotlib.pyplot as plt 
+from PIL import Image
+from scipy import ndimage
+
+def load_image_as_gray(path):
+    img = Image.open(path).convert('L')
+    arr = np.array(img, dtype=np.float64) / 255.0
+    return arr
+    
+def main():
+    image_path = "input.png" 
+    try:
+        img_gray = load_image_as_gray(image_path)
+    except FileNotFoundError:
+        print(f"Файл {image_path} не найден. Создадим тестовое изображение.")
+        h, w = 256, 256
+        y, x = np.ogrid[:h, :w]
+        img_gray = 0.5 + 0.3 * np.sin(2 * np.pi * x / w) * np.sin(2 * np.pi * y / h)
+        img_gray[80:176, 80:176] = 1.0
+    sigma = 2.0
+    img_blur = ndimage.gaussian_filter(img_gray, sigma=sigma)
+    size_median = 3
+    img_median = ndimage.median_filter(img_gray, size=size_median)
+    sobel_x = ndimage.sobel(img_gray, axis=1)
+    sobel_y = ndimage.sobel(img_gray, axis=0) 
+    edges = np.hypot(sobel_x, sobel_y)
+    edges /= edges.max()
+    sigma1, sigma2 = 1.0, 2.0
+    dog = ndimage.gaussian_filter(img_gray, sigma=sigma1) - ndimage.gaussian_filter(img_gray, sigma=sigma2)
+    threshold = 0.6
+    binary = img_gray > threshold
+    struct_elem = ndimage.generate_binary_structure(2, 1) 
+    eroded = ndimage.binary_erosion(binary, structure=struct_elem, iterations=2)
+    dilated = ndimage.binary_dilation(binary, structure=struct_elem, iterations=2)
+    fig, axs = plt.subplots(3, 3, figsize=(12, 12))
+    axs = axs.ravel()
+    titles = [
+        "Исходное",
+        f"Гауссово размытие (?={sigma})",
+        "Медианный фильтр",
+        "Границы (Sobel)",
+        "DoG (?1={}, ?2={})".format(sigma1, sigma2),
+        "Бинарное (порог={})".format(threshold),
+        "Эрозия",
+        "Дилатация",
+        ""
+    ]
+    images = [
+        img_gray,
+        img_blur,
+        img_median,
+        edges,
+        dog,
+        binary.astype(float),
+        eroded.astype(float),
+        dilated.astype(float),
+        None
+    ]
+    for ax, title, img in zip(axs, titles, images):
+        if img is None:
+            ax.axis('off')
+            continue
+        ax.imshow(img, cmap='gray')
+        ax.set_title(title)
+        ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+    
+if __name__ == "__main__":
+    main()
