@@ -1,0 +1,71 @@
+import numpy as np
+from scipy import special
+import matplotlib.pyplot as plt
+
+# 1. Гамма-функция и её логарифм
+x_gamma = np.linspace(0.1, 5, 100)
+gamma_vals = special.gamma(x_gamma)
+log_gamma_vals = special.gammaln(x_gamma)  # более численно устойчиво для больших x
+
+# 2. Бета-функция B(a, b)
+a_vals = np.linspace(0.5, 3, 50)
+b_val = 2.0
+beta_vals = special.beta(a_vals, b_val)
+
+# 3. Функции Бесселя первого рода J_n(x)
+x_bessel = np.linspace(0, 20, 200)
+j0_vals = special.jv(0, x_bessel)  # J_0
+j1_vals = special.jv(1, x_bessel)  # J_1
+j2_vals = special.jv(2, x_bessel)  # J_2
+
+# 4. Функция ошибок и дополнительная функция ошибок
+x_erf = np.linspace(-3, 3, 100)
+erf_vals = special.erf(x_erf)
+erfc_vals = special.erfc(x_erf)
+
+# Вывод нескольких значений для проверки
+print("Gamma(3) =", special.gamma(3))          # должно быть 2! = 2
+print("Beta(1, 1) =", special.beta(1, 1))      # должно быть 1
+print("J_0(0) =", special.jv(0, 0))            # должно быть 1
+print("erf(0) =", special.erf(0))              # должно быть 0
+
+# Построение графиков
+plt.figure(figsize=(12, 8))
+
+plt.subplot(2, 2, 1)
+plt.plot(x_gamma, gamma_vals, label="?(x)")
+plt.plot(x_gamma, np.exp(log_gamma_vals), "--", label="exp(ln?(x))", alpha=0.7)
+plt.xlabel("x")
+plt.ylabel("?(x)")
+plt.title("Гамма-функция")
+plt.legend()
+plt.grid(True)
+
+plt.subplot(2, 2, 2)
+plt.plot(a_vals, beta_vals, color="green")
+plt.xlabel("a")
+plt.ylabel("B(a, 2)")
+plt.title("Бета-функция при b=2")
+plt.grid(True)
+
+plt.subplot(2, 2, 3)
+plt.plot(x_bessel, j0_vals, label="J?(x)")
+plt.plot(x_bessel, j1_vals, label="J?(x)")
+plt.plot(x_bessel, j2_vals, label="J?(x)")
+plt.xlabel("x")
+plt.ylabel("J?(x)")
+plt.title("Функции Бесселя")
+plt.legend()
+plt.grid(True)
+
+plt.subplot(2, 2, 4)
+plt.plot(x_erf, erf_vals, label="erf(x)", color="purple")
+plt.plot(x_erf, erfc_vals, label="erfc(x)", linestyle="--", color="orange")
+plt.xlabel("x")
+plt.ylabel("Значение")
+plt.title("Функция ошибок и дополнительная функция ошибок")
+plt.legend()
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
